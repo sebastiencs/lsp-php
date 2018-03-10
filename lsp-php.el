@@ -1,8 +1,10 @@
 ;;; lsp-php.el --- PHP support for lsp-mode -*- lexical-binding: t -*-
 
-;; Copyright (C) 2018 Declspeck <declspeck@declblog.com>
+;; Copyright (C) 2017-2018 zg, Declspeck
 
 ;; Author: Declspeck <declspeck@declblog.com>
+;;         zg <13853850881@163.com>
+;; Maintainer: Declspeck <declspeck@declblog.com>
 ;; Version: 1.0
 ;; Package-Requires: ((emacs "25.1") (lsp-mode "3.4"))
 ;; URL: https://github.com/emacs-lsp/lsp-php
