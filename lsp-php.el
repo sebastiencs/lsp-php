@@ -35,9 +35,23 @@
   :group 'tools
   :group 'convenience)
 
-(defcustom lsp-php-language-server-command
-           (list "php" (expand-file-name "~/.config/composer/vendor/bin/php-language-server.php"))
-           "Command to run ´php-language-server´."
+(defun lsp-php-find-php-language-server-install-dir ()
+    "Return the default installation dir of php-language-server."
+    (let ((default-dir (locate-user-emacs-file "php-language-server/")))
+      (seq-find 'file-accessible-directory-p (list default-dir "~/.config/composer") default-dir)))
+
+(defcustom lsp-php-server-install-dir (lsp-php-find-php-language-server-install-dir)
+           "Install directory for php-language-server.
+This should point to the root of a Composer project requiring
+felixfbecker/language-server. If lsp-php-language-server-command is overridden,
+ this is setting has no effect."
+           :group 'lsp-php
+           :risky t
+           :type 'directory)
+
+(defcustom lsp-php-language-server-command nil
+           "Command to run php-language-server with.
+If nil, use lsp-php-server-install-dir and the php in path."
            :type '(repeat (string))
            :group 'lsp-php)
 
@@ -117,9 +131,19 @@
     '("\"message\":\"Parsing file:"
       "\"message\":\"Restored .*from cache")))
 
+; This applies default to lsp-php-language-server-command.
+; The default cannot be applied in defcustom, since it would depend on the value
+; of another defcustom, lsp-php-server-install-dir.
+(defun lsp-php-get-language-server-command ()
+  "Return the command to run php-language-server with."
+  (or lsp-php-language-server-command
+      (list "php" (expand-file-name
+                   "vendor/felixfbecker/language-server/bin/php-language-server.php"
+                   lsp-php-server-install-dir))))
+
 (lsp-define-stdio-client lsp-php "php"
                          'lsp-php-get-root
-                         lsp-php-language-server-command
+                         (lsp-php-get-language-server-command)
                          :ignore-regexps (lsp-php-get-ignore-regexps))
 
 (provide 'lsp-php)
