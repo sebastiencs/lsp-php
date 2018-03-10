@@ -49,15 +49,18 @@
 (defcustom lsp-php-workspace-root-detectors
            '(lsp-php-root-composer-json
              lsp-php-root-projectile
+             lsp-php-root-vcs
+             ".dir-locals.el"
+             ".project"
              "index.php"
              "robots.txt")
            "How to detect the project root. Selected methods are tried in the order they are specified."
            :type '(repeat (choice
-                            (const  :tag "Contains composer.json" lsp-php-root-composer-json)
-                            (const  :tag "Projectile root"        lsp-php-root-projectile)
+                            (const  :tag "Contains composer.json"      lsp-php-root-composer-json)
+                            (const  :tag "Projectile root"             lsp-php-root-projectile)
+                            (const  :tag "Version control system root" lsp-php-root-vcs)
                             (string :tag "Contains a named file")))
            :group 'lsp-php)
-
 
 (defun lsp-php-parent (path)
   "For PATH a/b/ or a/b return a\/. 'nil is passed through."
@@ -73,26 +76,37 @@
       (directory-file-name
         (expand-file-name path)))))
 
-(defun lsp-php-root-composer-json (dir)
-  "Return non-nil if DIR contains composer.json and is not of form ´../vendor/*/*/´."
+(defun lsp-php-root-vcs ()
+  "Return the project directory, as determined by VCS, if any."
+  (when (vc-backend default-directory) (vc-root-dir)))
+
+(defun lsp-php-is-composer-json-root (dir)
+  "Check if DIR contains composer.json and is not a vendor package."
   (let ((expanded-dir (expand-file-name dir)))
     (and (file-exists-p (expand-file-name "composer.json" expanded-dir))
          (let* ((grandparent (lsp-php-parent (lsp-php-parent expanded-dir)))
                 (basename-of-grandparent (lsp-php-basename grandparent)))
                 (not (equal "vendor" basename-of-grandparent))))))
 
-(defun lsp-php-root-projectile (dir)
-  "Check if DIR is the root of the current projectile project."
+(defun lsp-php-root-composer-json ()
+  "Return the parent directory containing composer.json, but which is not a vendor package."
+  (locate-dominating-file default-directory 'lsp-php-is-composer-json-root))
+
+(defun lsp-php-root-projectile ()
+  "Return the projectile root, if any."
   (and
    (fboundp 'projectile-project-p)
    (fboundp 'projectile-project-root)
    (projectile-project-p)
-   (equal (expand-file-name dir) (expand-file-name (projectile-project-root)))))
+   (projectile-project-root)))
 
 (defun lsp-php-get-root ()
   "Find workspace root as specified by ´lsp-php-workspace-root-detectors´. Defaults to ´default-directory´."
   (expand-file-name
-    (or (seq-some (lambda (predicate) (locate-dominating-file "." predicate))
+    (or (seq-some (lambda (filename-or-function)
+                    (if (stringp filename-or-function)
+                        (locate-dominating-file default-directory filename-or-function)
+                        (funcall filename-or-function)))
                   lsp-php-workspace-root-detectors)
         (progn (message "Couldn't find project root, using the current directory as the root.")
                default-directory))))

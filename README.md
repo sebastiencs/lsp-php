@@ -94,7 +94,7 @@ You can configure `lsp-php` with the following customization options:
 | ------ | ----------- |
 | `lsp-php-language-server-command` | Command to run php-language-server-with. Separate arguments Should be separate entries in the list. Defaults to `'("php" "/your-home-dir/.config/composer/vendor/bin/php-language-server.php")` |
 | `lsp-php-show-file-parse-notifications` | If `nil`, hide the `Parsing file:///var/www/index.php` and `Restored monolog/monolog:1.23.0 from cache` messages. Defaults to `t`. |
-| `lsp-php-workspace-root-detectors` | List of strings naming files that the root directory will contain, or the special symbols (not strings) `lsp-php-root-projectile` and `lsp-php-root-composer-json`. The detectors are evaluated in order, and the first one with a match will determine the workspace root. Defaults to `(quote (lsp-php-root-composer-json lsp-php-root-projectile "index.php" "robots.txt"))` |
+| `lsp-php-workspace-root-detectors` | List of strings naming dominating, or the special symbols (not strings) `lsp-php-root-vcs`, `lsp-php-root-projectile`, and `lsp-php-root-composer-json`. The detectors are evaluated in order, and the first one with a match will determine the workspace root. Defaults to `(quote (lsp-php-root-composer-json lsp-php-root-projectile lsp-php-root-vcs ".dir-locals.el" ".project" "index.php" "robots.txt"))` |
 
 ```emacs
 (custom-set-variables
