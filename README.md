@@ -26,7 +26,26 @@ Clone this repository, [emacs-lsp/lsp-mode](https://github.com/emacs-lsp/lsp-mod
 
 ### php-language-server
 
-You will need to install [felixbecker/php-language-server](https://github.com/felixfbecker/php-language-server). Package defaults assume  it is installed globally via Composer.
+You will need to install [felixbecker/php-language-server](https://github.com/felixfbecker/php-language-server). Package defaults assume it is either installed in `~/.emacs.d/php-language-server/vendor/felixfbecker/language-server` or installed globally via Composer.
+
+#### Local installation
+
+Create a directory for php-language-server in `.emacs.d/php-language-server`. Create a `composer.json` file in it, with the following contents:
+
+```json
+{
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
+
+```
+
+Then, in the directory, run the following commands:
+
+```shell
+composer require felixfbecker/language-server
+composer run-script --working-dir=vendor/felixfbecker/language-server parse-stubs
+```
 
 #### Global installation
 
@@ -47,33 +66,6 @@ composer global require felixbecker/php-language-server
 composer global run-script --working-dir=vendor/felixfbecker/language-server parse-stubs
 ```
 
-#### Local installation
-
-Create a directory for php-language-server. Create a `composer.json` file in it, with the following contents:
-
-```json
-{
-    "minimum-stability": "dev",
-    "prefer-stable": true
-}
-
-```
-
-Then, in the directory, run the following commands:
-
-```shell
-composer require felixfbecker/language-server
-composer run-script --working-dir=vendor/felixfbecker/language-server parse-stubs
-```
-
-Finally, point `lsp-php` to the correct directory with the customization option `lsp-php-language-server-command`. Note that your configuration may only have a single `custom-set-variables` section.
-
-```emacs
-(custom-set-variables
-  '(lsp-php-language-server-command (quote ("php" "path-to-your-directory/vendor/bin/php-language-server.php")))
-)
-```
-
 ## Workspace root detection
 
 By default, `lsp-php` determines the workspace root by the following detectors (in order.)
@@ -92,7 +84,8 @@ You can configure `lsp-php` with the following customization options:
 
 | Option | Description |
 | ------ | ----------- |
-| `lsp-php-language-server-command` | Command to run php-language-server-with. Separate arguments Should be separate entries in the list. Defaults to `'("php" "/your-home-dir/.config/composer/vendor/bin/php-language-server.php")` |
+| `lsp-php-server-install-dir` | Directory of a Composer project requiring `felixfbecker/language-server`. Defaults to `~/.emacs.d/php-language-server`. If it is not accessible, defaults to `~/.config/composer` (for globally required php-language-server). |
+| `lsp-php-language-server-command` | Command to run php-language-server-with. Separate arguments Should be separate entries in the list. Defaults to `(list "php" (expand-file-name "vendor/bin/php-language-server.php" lsp-php-server-install-dir))` |
 | `lsp-php-show-file-parse-notifications` | If `nil`, hide the `Parsing file:///var/www/index.php` and `Restored monolog/monolog:1.23.0 from cache` messages. Defaults to `t`. |
 | `lsp-php-workspace-root-detectors` | List of strings naming dominating, or the special symbols (not strings) `lsp-php-root-vcs`, `lsp-php-root-projectile`, and `lsp-php-root-composer-json`. The detectors are evaluated in order, and the first one with a match will determine the workspace root. Defaults to `(quote (lsp-php-root-composer-json lsp-php-root-projectile lsp-php-root-vcs ".dir-locals.el" ".project" "index.php" "robots.txt"))` |
 
