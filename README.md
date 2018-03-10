@@ -72,8 +72,11 @@ By default, `lsp-php` determines the workspace root by the following detectors (
 
 - `lsp-php-root-composer-json`: Find a directory that contains a `composer.json`, but is not two levels under `vendor`. I.e. for the path `/your/project/vendor/felixfbecker/language-server/src/` this would return `/your/project`, assuming it contains a `composer.json`.
 - `lsp-php-root-projectile`: Use the current Projectile project as the root directory.
-- `"index.php"`: Use the nearest parent directory (or self) containing an `index.php`.
-- `"robots.txt"`: Use the nearest parent directory (or self) containing a `robots.txt`.
+- `lsp-php-root-vcs`: Use the current version control system root as the project.
+- `".dir-locals.el"`: Use the nearest parent directory (or self) containing a `.dir-locals.el` file.
+- `".project"`: Use the nearest parent directory (or self) containing a `.project` file.
+- `"index.php"`: Use the nearest parent directory (or self) containing an `index.php` file.
+- `"robots.txt"`: Use the nearest parent directory (or self) containing a `robots.txt` file.
 - Default to `default-directory`.
 
 The order of the detectors is configurable. You can also specify additional files to look for in project directories.
