@@ -29,6 +29,7 @@
 ;;; Code:
 
 (require 'lsp-mode)
+(require 'php-mode)
 
 (defgroup lsp-php nil
   "´lsp-php´ integrates php-language-server with ´lsp-mode´."
@@ -131,6 +132,17 @@ If nil, use lsp-php-server-install-dir and the php in path."
     '("\"message\":\"Parsing file:"
       "\"message\":\"Restored .*from cache")))
 
+(defun lsp-php--render-string (str)
+  (ignore-errors
+    (with-temp-buffer
+	  (delay-mode-hooks (php-mode))
+	  (insert str)
+	  (font-lock-ensure)
+	  (buffer-string))))
+
+(defun lsp-php--initialize-client (client)
+  (lsp-provide-marked-string-renderer client "php" 'lsp-php--render-string))
+
 ; This applies default to lsp-php-language-server-command.
 ; The default cannot be applied in defcustom, since it would depend on the value
 ; of another defcustom, lsp-php-server-install-dir.
@@ -144,7 +156,8 @@ If nil, use lsp-php-server-install-dir and the php in path."
 (lsp-define-stdio-client lsp-php "php"
                          'lsp-php-get-root
                          (lsp-php-get-language-server-command)
-                         :ignore-regexps (lsp-php-get-ignore-regexps))
+                         :ignore-regexps (lsp-php-get-ignore-regexps)
+                         :initialize 'lsp-php--initialize-client)
 
 (provide 'lsp-php)
 
